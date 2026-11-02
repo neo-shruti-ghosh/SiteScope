@@ -1,0 +1,139 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Auth.js ----------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  audits   Audit[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ---------- Audits ----------
+
+enum AuditStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum CategoryStatus {
+  COMPLETE
+  PARTIAL
+  FAILED
+}
+
+model Audit {
+  id            String      @id @default(cuid())
+  userId        String
+  url           String
+  normalizedUrl String
+  context       String
+  status        AuditStatus @default(QUEUED)
+  overallScore  Int?
+  grade         String?
+  uiIdeas       Json?
+  screenshots   Json?
+  error         String?
+  rerunOfId     String?
+  createdAt     DateTime    @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rerunOf         Audit?           @relation("Reruns", fields: [rerunOfId], references: [id], onDelete: SetNull)
+  reruns          Audit[]          @relation("Reruns")
+  categoryResults CategoryResult[]
+  events          AuditEvent[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model CategoryResult {
+  id        String         @id @default(cuid())
+  auditId   String
+  category  String
+  score     Int?
+  status    CategoryStatus
+  summary   String
+  issues    Json
+  fixes     Json
+  toolsUsed Json
+  metrics   Json?
+  createdAt DateTime       @default(now())
+
+  audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@unique([auditId, category])
+}
+
+model AuditEvent {
+  id        String   @id @default(cuid())
+  auditId   String
+  seq       Int
+  type      String
+  node      String?
+  message   String
+  data      Json?
+  createdAt DateTime @default(now())
+
+  audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@unique([auditId, seq])
+}

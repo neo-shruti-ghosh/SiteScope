@@ -1,0 +1,37 @@
+{
+  "name": "@sitescope/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=../../.env src/server.ts",
+    "start": "tsx --env-file=../../.env src/server.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@auth/core": "0.41.3",
+    "@axe-core/playwright": "^4.14.0",
+    "@langchain/anthropic": "^1.6.0",
+    "@langchain/core": "^1.3.2",
+    "@langchain/langgraph": "^1.6.0",
+    "@sitescope/db": "workspace:*",
+    "@sitescope/shared": "workspace:*",
+    "cheerio": "^1.2.0",
+    "chrome-launcher": "^1.2.2",
+    "cookie": "^2.0.1",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "ipaddr.js": "^2.5.0",
+    "lighthouse": "^13.6.0",
+    "p-queue": "^10.0.0",
+    "playwright": "1.64.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3"
+  }
+}
