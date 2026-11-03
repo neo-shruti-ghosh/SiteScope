@@ -1,5 +1,6 @@
 import { type AuditDetail, AuditDetailSchema, type AuditSummary, AuditSummarySchema } from "@sitescope/shared";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { z } from "zod";
 import { API_URL } from "./api";
 
@@ -17,4 +18,5 @@ const get = async <T>(path: string, schema: z.ZodType<T>): Promise<T | null> => 
 export const fetchAudits = async (): Promise<AuditSummary[]> =>
   (await get("/api/audits", z.array(AuditSummarySchema))) ?? [];
 
-export const fetchAudit = (id: string): Promise<AuditDetail | null> => get(`/api/audits/${id}`, AuditDetailSchema);
+// cache() dedupes per request: generateMetadata and the page share one API call.
+export const fetchAudit = cache((id: string): Promise<AuditDetail | null> => get(`/api/audits/${id}`, AuditDetailSchema));

@@ -20,7 +20,11 @@ const EnvSchema = z.object({
   LIGHTHOUSE_CACHE_TTL_MS: z.coerce.number().int().nonnegative().default(15 * 60 * 1000),
   LANGUAGETOOL_URL: z.string().default("https://api.languagetool.org/v2/check"),
   CHROME_PATH: optional,
-  /** Optional: without it, Claude-powered analysis is skipped and those categories show as not scored. */
+  /** Which model powers AI analysis. Without that provider's key, AI analysis is skipped. */
+  LLM_PROVIDER: z.enum(["gemini", "claude"]).default("gemini"),
+  GEMINI_API_KEY: optional,
+  /** Comma-separated, tried in order: free-tier capacity shifts between models, so a busy one is skipped. */
+  GEMINI_MODELS: z.string().default("gemini-3-flash-preview,gemini-3.6-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite"),
   ANTHROPIC_API_KEY: optional,
   CLAUDE_MODEL: z.string().default("claude-sonnet-5-5"),
 });

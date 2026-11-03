@@ -2,7 +2,7 @@ import type { UiIdea } from "@sitescope/shared";
 import { Lightbulb } from "lucide-react";
 import { EffortBadge, SeverityBadge } from "./badges";
 
-/** "Ideas to improve UI/UX": suggested features and enhancements from Claude. */
+/** "Ideas to improve UI/UX": suggested features and enhancements from the AI model. */
 export function IdeasSection({ ideas }: { ideas: UiIdea[] }) {
   return (
     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

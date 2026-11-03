@@ -22,7 +22,7 @@ export const grammarResult = (
   language: string,
   { filtered }: { filtered: boolean },
 ): CategoryResult => {
-  // Unfiltered spelling hits are mostly names and jargon, so they only count once Claude has vetted them.
+  // Unfiltered spelling hits are mostly names and jargon, so they only count once the AI model has vetted them.
   const counted = filtered ? matches : matches.filter((m) => m.rule.issueType !== "misspelling");
   const per1k = (counted.length / Math.max(wordCount, MIN_WORDS_FOR_RATE)) * 1000;
   const score = clampScore(100 - per1k * PENALTY_PER_ERROR_PER_1K);
@@ -40,7 +40,7 @@ export const grammarResult = (
   return {
     category: "grammar",
     score,
-    // Without Claude's false-positive filtering (names, brand terms), results are only indicative.
+    // Without AI false-positive filtering (names, brand terms), results are only indicative.
     status: filtered ? "COMPLETE" : "PARTIAL",
     summary:
       matches.length === 0

@@ -106,7 +106,7 @@ export function NewAuditForm() {
           </p>
         ) : (
           <p id="context-hint" className="text-sm text-muted-foreground">
-            Claude uses this to judge content, GEO/AEO and which features you&apos;re missing.
+            The AI model uses this to judge content, GEO/AEO and which features you&apos;re missing.
           </p>
         )}
       </div>

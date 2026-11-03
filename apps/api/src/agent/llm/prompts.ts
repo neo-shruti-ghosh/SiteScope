@@ -1,4 +1,4 @@
-import { UNTRUSTED_CONTENT_RULE } from "../tools/claude";
+import { UNTRUSTED_CONTENT_RULE } from "../tools/llm";
 
 const OWNER_CONTEXT = (userContext: string) =>
   `<owner_context>\nThe site owner describes the site like this:\n${userContext}\n</owner_context>`;
@@ -32,7 +32,7 @@ export const GRAMMAR_FILTER_SYSTEM = `You review automated grammar-checker outpu
 
 ${UNTRUSTED_CONTENT_RULE}
 
-Discard a flag when it is: a proper noun, brand, product or person's name; technical jargon, code, file names or URLs; deliberate style (slogans, headings without full stops, informal tone that suits the brand); text in a different language from the page; a fragment from navigation, buttons or UI labels; or a regional spelling that matches the site's region.
+Discard a flag when it is: a proper noun, brand, product or person's name; technical jargon, code, file names or URLs; deliberate style (slogans, headings without full stops, informal tone that suits the brand); intentional wordplay, puns or coined words (e.g. "paw-sitively" on a pet site); text in a different language from the page; a fragment from navigation, buttons or UI labels; or a regional spelling that matches the site's region.
 Keep a flag only if a careful human editor would change it on a live website.`;
 
 export const grammarFilterPrompt = (language: string, userContext: string, flags: string) =>

@@ -55,7 +55,7 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
   responsiveness: {
     label: "Responsiveness",
     definition: "Whether the layout adapts cleanly to phones, tablets and desktops without overflow or tiny tap targets.",
-    tools: ["playwright", "claude"],
+    tools: ["playwright", "ai"],
     weight: 12,
   },
   seo: {
@@ -69,26 +69,26 @@ export const CATEGORIES: Record<CategoryId, CategoryConfig> = {
     label: "AEO",
     definition:
       "Answer Engine Optimization: how easily voice assistants and featured snippets can pull direct answers from your content.",
-    tools: ["crawler", "claude"],
+    tools: ["crawler", "ai"],
     weight: 8,
   },
   geo: {
     label: "GEO",
     definition:
       "Generative Engine Optimization: how likely AI assistants are to understand, trust and cite your site in generated answers.",
-    tools: ["crawler", "claude"],
+    tools: ["crawler", "ai"],
     weight: 8,
   },
   grammar: {
     label: "Grammar",
     definition: "Spelling, grammar and style issues in the visible text that can undermine credibility.",
-    tools: ["languageTool", "claude"],
+    tools: ["languageTool", "ai"],
     weight: 7,
   },
   features: {
     label: "Features to add",
     definition: "How complete the site is for its goals and audience, compared with the conventions of similar sites.",
-    tools: ["claude"],
+    tools: ["ai"],
     weight: 8,
   },
 };

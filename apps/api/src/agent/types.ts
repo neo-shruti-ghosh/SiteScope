@@ -27,7 +27,7 @@ export interface SiteFiles {
 export interface Screenshot {
   width: number;
   url: string;
-  /** Local file path, for later analysis (e.g. Claude vision). */
+  /** Local file path, for later analysis (e.g. the AI visual review). */
   path: string;
 }
 

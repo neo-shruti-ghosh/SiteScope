@@ -10,7 +10,8 @@ export const NODE_TIMEOUTS_MS: Record<NodeId, number> = {
   accessibility: 5 * MINUTE,
   responsiveness: 3 * MINUTE,
   seo: 5 * MINUTE,
-  grammar: 2 * MINUTE,
+  // LanguageTool (up to 45s) plus one AI call, which may fall back through several Gemini models.
+  grammar: 4 * MINUTE,
   llmAnalysis: 3 * MINUTE,
   scoreAggregator: 0.5 * MINUTE,
   reportWriter: 0.5 * MINUTE,

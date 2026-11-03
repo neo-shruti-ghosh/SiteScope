@@ -15,7 +15,7 @@ export const NODES: Record<NodeId, NodeConfig> = {
   responsiveness: { label: "Responsiveness", categories: ["responsiveness"] },
   seo: { label: "SEO", categories: ["seo"] },
   grammar: { label: "Grammar", categories: ["grammar"] },
-  llmAnalysis: { label: "Claude analysis", categories: ["aeo", "geo", "features"] },
+  llmAnalysis: { label: "AI analysis", categories: ["aeo", "geo", "features"] },
   scoreAggregator: { label: "Score", categories: [] },
   reportWriter: { label: "Report", categories: [] },
 };

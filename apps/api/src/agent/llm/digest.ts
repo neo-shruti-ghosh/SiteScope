@@ -19,7 +19,7 @@ export const schemaTypes = (jsonLd: unknown[]): string[] => {
 
 export const isQuestionHeading = (text: string) => text.trim().endsWith("?") || QUESTION_START.test(text.trim());
 
-/** Deterministic AEO/GEO signals, measured rather than guessed, to ground Claude's judgement. */
+/** Deterministic AEO/GEO signals, measured rather than guessed, to ground the model's judgement. */
 export const contentSignals = (pages: CrawledPage[], files: SiteFiles) => {
   const headings = pages.flatMap((p) => p.headings);
   const types = schemaTypes(pages.flatMap((p) => p.jsonLd));
@@ -60,7 +60,7 @@ const pageBlock = (p: CrawledPage) =>
     "</page>",
   ].join("\n");
 
-/** The site as Claude sees it: crawl data wrapped as untrusted content, plus measured signals. */
+/** The site as the model sees it: crawl data wrapped as untrusted content, plus measured signals. */
 export const siteDigest = (pages: CrawledPage[], files: SiteFiles) =>
   [
     "<site_content>",

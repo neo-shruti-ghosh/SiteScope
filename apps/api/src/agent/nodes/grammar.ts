@@ -3,7 +3,7 @@ import { grammarResult } from "../categories/grammar";
 import { GRAMMAR_FILTER_SYSTEM, grammarFilterPrompt } from "../llm/prompts";
 import type { NodeOutcome } from "../safe-node";
 import type { AuditStateType } from "../state";
-import { askClaude, claudeEnabled } from "../tools/claude";
+import { askModel, llmEnabled, llmName, llmToolId } from "../tools/llm";
 import { checkText, LANGUAGETOOL_MAX_CHARS, type LanguageToolMatch, languageToolCode } from "../tools/language-tool";
 import type { AgentContext, CrawledPage } from "../types";
 import { plural, saveResults } from "./shared";
@@ -36,31 +36,32 @@ const describeFlag = (m: LanguageToolMatch, i: number) => {
   return `[${i}] ${m.message}${suggestion ? ` → "${suggestion}"` : ""}\n    ${marked}`;
 };
 
-/** Asks Claude which LanguageTool flags are real errors (names, jargon and UI text are not). */
-const filterWithClaude = async (ctx: AgentContext, matches: LanguageToolMatch[], language: string) => {
+/** Asks the AI model which LanguageTool flags are real errors (names, jargon and UI text are not). */
+const filterWithModel = async (ctx: AgentContext, matches: LanguageToolMatch[], language: string) => {
   const reviewed = matches.slice(0, MAX_FLAGS_FOR_REVIEW);
-  const { genuine } = await askClaude(
+  const { genuine } = await askModel(
     GrammarFilterSchema,
     "grammar_filter",
     GRAMMAR_FILTER_SYSTEM,
     grammarFilterPrompt(language, ctx.userContext, reviewed.map(describeFlag).join("\n")),
+    { onFallback: (message) => ctx.emit({ type: "finding", node: "grammar", message, data: { severity: "info" } }) },
   );
   const keep = new Set(genuine);
   return reviewed.filter((_, i) => keep.has(i));
 };
 
-/** Matches confirmed by Claude, or null when they couldn't be vetted (no key, or Claude failed). */
+/** Matches confirmed by the AI model, or null when they couldn't be vetted (no key, or the call failed). */
 const vetMatches = async (ctx: AgentContext, matches: LanguageToolMatch[], language: string) => {
   if (matches.length === 0) return [];
-  if (!claudeEnabled()) return null;
+  if (!llmEnabled()) return null;
 
-  await ctx.emit({ type: "tool_called", node: "grammar", message: "Claude is filtering out false positives", data: { tool: "claude" } });
+  await ctx.emit({ type: "tool_called", node: "grammar", message: `${llmName} is filtering out false positives`, data: { tool: llmToolId } });
   try {
-    const kept = await filterWithClaude(ctx, matches, language);
+    const kept = await filterWithModel(ctx, matches, language);
     await ctx.emit({
       type: "finding",
       node: "grammar",
-      message: `Claude confirmed ${kept.length} of ${matches.length} flags as genuine errors`,
+      message: `${llmName} confirmed ${kept.length} of ${matches.length} flags as genuine errors`,
       data: { severity: kept.length > 5 ? "medium" : "info" },
     });
     return kept;
@@ -68,7 +69,7 @@ const vetMatches = async (ctx: AgentContext, matches: LanguageToolMatch[], langu
     await ctx.emit({
       type: "error",
       node: "grammar",
-      message: `Claude filtering failed, showing unfiltered results: ${error instanceof Error ? error.message : String(error)}`,
+      message: `${llmName} filtering failed, showing unfiltered results: ${error instanceof Error ? error.message : String(error)}`,
       data: { recoverable: true },
     });
     return null;

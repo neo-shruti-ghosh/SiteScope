@@ -139,12 +139,12 @@ export const responsivenessResult = ({ viewportMeta, checks }: ResponsivenessInp
           : `${findings.length} layout issue${findings.length === 1 ? "" : "s"} across ${checks.map((c) => `${c.width}px`).join(", ")}.`,
     issues: findings.map((f) => f.issue).toSorted(bySeverity),
     fixes: findings.flatMap((f) => (f.fix ? [{ issueId: f.issue.id, ...f.fix }] : [])),
-    toolsUsed: CATEGORIES.responsiveness.tools.filter((t) => t !== "claude"),
+    toolsUsed: CATEGORIES.responsiveness.tools.filter((t) => t !== "ai"),
     metrics: { viewportMeta, checks },
   };
 };
 
-// ---------- Claude vision review ----------
+// ---------- AI visual review ----------
 
 export const VisualReviewSchema = z.object({
   visualScore: z.number().describe("0-100 visual quality of the responsive design across the screenshots"),
@@ -153,7 +153,7 @@ export const VisualReviewSchema = z.object({
 });
 export type VisualReview = z.infer<typeof VisualReviewSchema>;
 
-/** Measured checks carry most of the weight; Claude's visual review adjusts the score and adds what it saw. */
+/** Measured checks carry most of the weight; the AI visual review adjusts the score and adds what it saw. */
 const MEASURED_WEIGHT = 0.6;
 
 export const withVisualReview = (measured: CategoryResult, review: VisualReview): CategoryResult => {

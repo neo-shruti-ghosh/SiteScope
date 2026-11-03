@@ -40,6 +40,8 @@ export const TOOL_ICONS: Record<ToolId, LucideIcon> = {
   axe: Accessibility,
   crawler: Globe,
   languageTool: SpellCheck,
+  ai: Sparkles,
+  gemini: Sparkles,
   claude: Sparkles,
 };
 

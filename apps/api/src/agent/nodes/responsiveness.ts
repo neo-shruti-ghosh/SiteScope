@@ -2,7 +2,7 @@ import type { CategoryResult } from "@sitescope/shared";
 import { responsivenessResult, type ViewportCheck, VisualReviewSchema, withVisualReview } from "../categories/responsiveness";
 import { SCREENSHOT_WIDTHS } from "../config";
 import { VISION_REVIEW_SYSTEM, visionReviewPrompt } from "../llm/prompts";
-import { askClaude, claudeEnabled, imageBlock } from "../tools/claude";
+import { askModel, imageBlock, llmEnabled, llmName, llmToolId } from "../tools/llm";
 import type { NodeOutcome } from "../safe-node";
 import type { AuditStateType } from "../state";
 import type { AgentContext, Screenshot } from "../types";
@@ -51,24 +51,24 @@ const inspectLayout = () => {
 
 const viewportHeight = (width: number) => (width < 768 ? 812 : width < 1024 ? 1024 : 900);
 
-/** Claude looks at the screenshots for problems measurements can't see; falls back to measurements alone. */
+/** The AI model looks at the screenshots for problems measurements can't see; falls back to measurements alone. */
 const reviewVisually = async (
   ctx: AgentContext,
   measured: CategoryResult,
   captures: { check: ViewportCheck; shot: Screenshot }[],
 ): Promise<CategoryResult> => {
-  if (!claudeEnabled() || captures.length === 0) return measured;
+  if (!llmEnabled() || captures.length === 0) return measured;
 
-  await ctx.emit({ type: "tool_called", node: "responsiveness", message: "Claude is reviewing the screenshots", data: { tool: "claude" } });
+  await ctx.emit({ type: "tool_called", node: "responsiveness", message: `${llmName} is reviewing the screenshots`, data: { tool: llmToolId } });
   try {
     const measurements = measured.issues.map((i) => `- ${i.title}`).join("\n") || "- No measured problems.";
     const images = await Promise.all(
       captures.map(async ({ shot }) => [{ type: "text" as const, text: `Screenshot at ${shot.width}px:` }, await imageBlock(shot.path)]),
     );
-    const review = await askClaude(VisualReviewSchema, "visual_review", VISION_REVIEW_SYSTEM, [
+    const review = await askModel(VisualReviewSchema, "visual_review", VISION_REVIEW_SYSTEM, [
       { type: "text", text: visionReviewPrompt(ctx.userContext, measurements) },
       ...images.flat(),
-    ]);
+    ], { onFallback: (message) => ctx.emit({ type: "finding", node: "responsiveness", message, data: { severity: "info" } }) });
     await Promise.all(
       review.findings
         .filter((f) => f.severity !== "low")
@@ -80,7 +80,7 @@ const reviewVisually = async (
     await ctx.emit({
       type: "error",
       node: "responsiveness",
-      message: `Claude's visual review failed; using measurements only: ${error instanceof Error ? error.message : String(error)}`,
+      message: `${llmName}'s visual review failed; using measurements only: ${error instanceof Error ? error.message : String(error)}`,
       data: { recoverable: true },
     });
     return measured;

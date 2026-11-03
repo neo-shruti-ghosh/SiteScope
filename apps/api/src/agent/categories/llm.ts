@@ -2,14 +2,15 @@ import { CATEGORIES, type CategoryId, type CategoryResult, Effort, Priority, UiI
 import { z } from "zod";
 import { bySeverity, clampScore } from "./format";
 
-// Structured-output schemas avoid optional fields and numeric bounds (not reliably supported);
-// nullable stands in for optional, and scores are clamped after parsing.
+// Structured-output schemas stay within what both Gemini and Claude accept: no optional or nullable
+// fields (Gemini rejects JSON Schema type arrays like ["string", "null"]) and no numeric bounds.
+// An empty string stands in for "none", and scores are clamped after parsing.
 
 export const LlmFindingSchema = z.object({
   title: z.string().describe("Short, specific problem statement (under 90 characters)"),
   detail: z.string().describe("Why it matters for this site's goals, in 1-2 sentences"),
   severity: Priority,
-  evidence: z.string().nullable().describe("Quote or concrete observation from the site, or null"),
+  evidence: z.string().describe("Quote or concrete observation from the site, or an empty string if none"),
   fix: z.object({
     title: z.string().describe("Imperative action, e.g. 'Add an FAQ section with FAQPage schema'"),
     steps: z.string().describe("Concrete steps tailored to this site, 1-4 sentences"),
@@ -37,12 +38,12 @@ export type ContentAnalysis = z.infer<typeof ContentAnalysisSchema>;
 
 const MAX_FINDINGS = 6;
 
-/** Turns Claude findings into issues and fixes that link to each other by id. */
+/** Turns AI-model findings into issues and fixes that link to each other by id. */
 export const findingsToIssuesAndFixes = (prefix: string, findings: LlmFinding[]) => {
   const ranked = findings.slice(0, MAX_FINDINGS).map((f, i) => ({ ...f, id: `${prefix}-${i + 1}` }));
   return {
     issues: ranked
-      .map((f) => ({ id: f.id, title: f.title, detail: f.detail, severity: f.severity, evidence: f.evidence ?? undefined }))
+      .map((f) => ({ id: f.id, title: f.title, detail: f.detail, severity: f.severity, evidence: f.evidence || undefined }))
       .toSorted(bySeverity),
     fixes: ranked.map((f) => ({ issueId: f.id, priority: f.severity, ...f.fix })),
   };
